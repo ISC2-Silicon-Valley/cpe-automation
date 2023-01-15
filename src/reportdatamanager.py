@@ -28,7 +28,7 @@ class ReportDataManager:
 
     # Writes the contents of a CSV file on the local machine to a Google sheet
     def _writeCSVToSpreadsheet(self, file_name, spreadsheetID, sheet_name, include_header):
-       with open(file_name, 'r') as csvfile:
+        with open(file_name, 'r') as csvfile:
             rows = []
             csvreader = csv.reader(csvfile)
 

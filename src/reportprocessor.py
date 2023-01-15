@@ -40,7 +40,10 @@ class ReportProcessor:
         
         df_registration = pd.read_csv(registration_file, header=0)
         df_registration.rename(columns={"For CPE credit provide (ISC)2 Membership ID:": "(ISC)2 Certification:"},  inplace=True)
-        df_registration.drop(["Country/Region", "Unnamed: 8"], axis=1, inplace=True)
+        try:
+            df_registration.drop(["Country/Region", "Unnamed: 8"], axis=1, inplace=True)
+        except KeyError:
+            print("Unnamed country not found. Continuing on")
         df_registration['Email'] = df_registration['Email'].str.lower()
 
         df_attendance = pd.read_csv(attendance_file, header=0)

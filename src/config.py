@@ -15,7 +15,7 @@ import numpy
 class Config:
     def __init__(self):
         # TODO: Update config file reference to automatically pick up from config folder
-        with open("/Users/jbourne/GitHub/ISC2SV/ISC2_config/config.yaml") as f:
+        with open("/Users/jbourne/GitHub/cpe-automation/config/config.yaml") as f:
             config = yaml.load(f, Loader=SafeLoader)
         
         self.CPECertificateFolderID = config["cpe_certificate_folder_id"]
@@ -175,7 +175,7 @@ class Meeting:
             meeting_date = pd.to_datetime(meeting_date)
 
         if isinstance(meeting_date, pd.Timestamp):
-            meet_date = meeting_date.strftime("%m/%d/%Y")
+            meet_date = meeting_date.strftime("%-m/%d/%Y")
             meeting_month_date = meeting_date.strftime("%b %Y")
         else:
             raise Exception("Meeting date is not valid")

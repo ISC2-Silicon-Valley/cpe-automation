@@ -36,8 +36,8 @@ def main(argv):
     #If the files being processed are meeting files, as opposed to a webinar file, the webinarFile variable value should be a zero length string.
     webinarFile = "" #"20220913_attendee_report.csv"
 
-    registrationFile = "Jan10-2023_RegistrationReport.csv"
-    attendeeFile = "Jan10-2023_ParticipantsReport.csv"
+    registrationFile = "20230110_registration_report.csv"
+    attendeeFile = "20230110_participant_report.csv"
 
     # NOTE: If the file exists in the input folder, on your local system, it will be removed so that a fresh copy will be downloaded.
     if len(webinarFile) >= 1:

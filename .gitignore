@@ -2,10 +2,6 @@
 .vscode/launch.json
 .venv
 src/__pycache__
-credentials.json
 token_doc.json
-token.json
 src/Experiments/__pycache__/
-csv_input/*
-csv_output/*
-ISC2_config/config.yaml
+
