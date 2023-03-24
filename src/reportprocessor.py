@@ -39,7 +39,7 @@ class ReportProcessor:
         attendance_file = self.config.InputPath + attendanceFileName
         
         df_registration = pd.read_csv(registration_file, header=0)
-        df_registration.rename(columns={"For CPE credit provide (ISC)2 Membership ID:": "(ISC)2 Certification:"},  inplace=True)
+        df_registration.rename(columns={"ISC2 Member ID (required to log ISC2 CPE)": "(ISC)2 Certification:"},  inplace=True)
         try:
             df_registration.drop(["Country/Region", "Unnamed: 8"], axis=1, inplace=True)
         except KeyError:
