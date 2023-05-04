@@ -27,7 +27,7 @@ class messaging:
     #         create_message = {'raw': encoded_message}
             
     #         send_message = (service.users().messages().send(userId="me", body=create_message).execute())
-  
+
     #     except HttpError as error:
     #         print(f'An error occurred: {error}')
     #         send_message = None
@@ -40,7 +40,7 @@ class messaging:
         
         file_attachments = [attachment_file]
 
-        message_body_text = "Hello %s, Thank you for having joined the (ISC)² Silicon Valley Chapter Meeting on %s."\
+        message_body_text = "Hello %s, Thank you for attending the (ISC)² Silicon Valley Chapter Meeting on %s."\
             "<br><br> Your CPE certificate is attached.<br><br>"\
             "Note that the chapter will submit chapter meeting CPE's on your behalf." % (member_name, meeting_date.strftime("%B %d, %Y"))
 

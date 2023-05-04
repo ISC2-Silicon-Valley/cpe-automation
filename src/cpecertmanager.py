@@ -71,6 +71,7 @@ class CPECertificateManager:
             
             self.g.download_file(user_cpe_file_id, user_cpe_pdf_file_name, "application/pdf")
             self.m.send_message_and_attachments(merge_data["member_name"], merge_data["email_address"], user_cpe_pdf_file_name, meeting_date)
+            #TODO Delete local files when done sending email
 
 c = Config()
 
