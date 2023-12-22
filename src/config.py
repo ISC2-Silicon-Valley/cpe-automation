@@ -1,23 +1,25 @@
-from google_auth_oauthlib.flow import InstalledAppFlow
+import io
+import os
+from datetime import datetime as dt
+
+import numpy
+import pandas as pd
+import yaml
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
-from yaml.loader import SafeLoader
-import os
-import yaml
-from datetime import datetime as dt
-import pandas as pd
-import io
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
-import numpy
+from yaml.loader import SafeLoader
+
 
 class Config:
     def __init__(self):
         # TODO: Update config file reference to automatically pick up from config folder
         with open("/Users/jbourne/GitHub/cpe-automation/config/config.yaml") as f:
             config = yaml.load(f, Loader=SafeLoader)
-        
+
         self.CPECertificateFolderID = config["cpe_certificate_folder_id"]
         self.CPECertificateTemplateID = config["cpe_certifictate_template_id"]
         self.CPECertificateSheetID = config["cpe_certificate_sheet_id"]
@@ -43,15 +45,24 @@ class Config:
                 config["chapter-officers"][officer]["member_certification_id"],
                 config["chapter-officers"][officer]["personal_email"],
                 config["chapter-officers"][officer]["phone_number"],
-                officer
+                officer,
             )
 
             self.Officers.append(o)
 
 
 class Officer:
-    def __init__(self, chapter_email, user_name, first_name, last_name, certification_id, personal_email, phone_number, role):
-
+    def __init__(
+        self,
+        chapter_email,
+        user_name,
+        first_name,
+        last_name,
+        certification_id,
+        personal_email,
+        phone_number,
+        role,
+    ):
         self.ChapterEmail = chapter_email
         self.UserName = user_name
         self.FirstName = first_name
@@ -61,6 +72,7 @@ class Officer:
         self.PhoneNumber = phone_number
         self.Role = role
 
+
 class Google:
     def __init__(self, config):
         token_file = config.ConfigPath + "token.json"
@@ -68,10 +80,10 @@ class Google:
         self.creds = None
 
         token_scope = [
-            'https://www.googleapis.com/auth/drive',
-            'https://www.googleapis.com/auth/documents',
-            'https://www.googleapis.com/auth/spreadsheets',
-            'https://mail.google.com/'
+            "https://www.googleapis.com/auth/drive",
+            "https://www.googleapis.com/auth/documents",
+            "https://www.googleapis.com/auth/spreadsheets",
+            "https://mail.google.com/",
         ]
 
         # The file token file stores the user's access and refresh tokens, and is
@@ -85,35 +97,41 @@ class Google:
             if self.creds and self.creds.expired and self.creds.refresh_token:
                 self.creds.refresh(Request())
             else:
-                flow = InstalledAppFlow.from_client_secrets_file(credential_file, token_scope)
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    credential_file, token_scope
+                )
                 self.creds = flow.run_local_server(port=0)
 
             # Save the credentials for the next run
-            with open(token_file, 'w') as token:
+            with open(token_file, "w") as token:
                 token.write(self.creds.to_json())
 
     def drive_service(self):
-        return build('drive', 'v3', credentials=self.creds)
-    
+        return build("drive", "v3", credentials=self.creds)
+
     def docs_service(self):
-        return build('docs', 'v1', credentials=self.creds)
-            
+        return build("docs", "v1", credentials=self.creds)
+
     def sheets_service(self):
-        return build('sheets', 'v4', credentials=self.creds)
-    
+        return build("sheets", "v4", credentials=self.creds)
+
     def mail_service(self):
-        return build('gmail', 'v1', credentials=self.creds)
-    
+        return build("gmail", "v1", credentials=self.creds)
+
     def download_file(self, file_id, file_path_name, mime_type):
         try:
-            request = self.drive_service().files().export_media(fileId=file_id, mimeType=mime_type)
+            request = (
+                self.drive_service()
+                .files()
+                .export_media(fileId=file_id, mimeType=mime_type)
+            )
             file = io.BytesIO()
             downloader = MediaIoBaseDownload(file, request)
             done = False
             while done is False:
                 status, done = downloader.next_chunk()
         except HttpError as error:
-            print(F'An error occurred: {error}')
+            print(f"An error occurred: {error}")
             file = None
 
         with open(file_path_name, "wb") as f:
@@ -124,39 +142,48 @@ class Google:
         sheet_exists = False
         sheet_id = -1
 
-        spreadsheet = self.sheets_service().spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
+        spreadsheet = (
+            self.sheets_service()
+            .spreadsheets()
+            .get(spreadsheetId=spreadsheet_id)
+            .execute()
+        )
         for sheet in spreadsheet["sheets"]:
             if sheet["properties"]["title"] == sheet_name:
                 sheet_id = sheet["properties"]["sheetId"]
                 sheet_exists = True
-    
+
         output = {}
         output["Spreadsheet_ID"] = spreadsheet_id
         output["Sheet_Exists"] = sheet_exists
         output["Sheet_Name"] = sheet_name
         output["Sheet_ID"] = sheet_id
         return output
-    
+
     # Adds a new sheet with the specified sheet name to a google spreadsheet
     def add_sheet(self, spreadsheet_id, sheet_name):
         request_body = {
-            'requests': [{
-                'addSheet': {
-                    'properties': {
-                        'title': sheet_name,
-                        'tabColor': {
-                            'red': 0.44,
-                            'green': 0.99,
-                            'blue': 0.50
+            "requests": [
+                {
+                    "addSheet": {
+                        "properties": {
+                            "title": sheet_name,
+                            "tabColor": {"red": 0.44, "green": 0.99, "blue": 0.50},
                         }
                     }
                 }
-            }]
+            ]
         }
 
-        response = self.sheets_service().spreadsheets().batchUpdate(spreadsheetId=spreadsheet_id, body=request_body).execute()
+        response = (
+            self.sheets_service()
+            .spreadsheets()
+            .batchUpdate(spreadsheetId=spreadsheet_id, body=request_body)
+            .execute()
+        )
 
         return response
+
 
 class Meeting:
     def __init__(self):
@@ -169,7 +196,13 @@ class Meeting:
         output = {}
         meeting_found = False
 
-        data =  self.sheets_service.spreadsheets().values().get(spreadsheetId=self.config.MeetingInfoSheetID, range='Sheet1').execute().get('values')[1:]
+        data = (
+            self.sheets_service.spreadsheets()
+            .values()
+            .get(spreadsheetId=self.config.MeetingInfoSheetID, range="Sheet1")
+            .execute()
+            .get("values")[1:]
+        )
 
         if isinstance(meeting_date, numpy.datetime64):
             meeting_date = pd.to_datetime(meeting_date)
@@ -187,7 +220,11 @@ class Meeting:
                 output["CPE_Group"] = row[2]
                 output["CPE_Domain"] = row[3]
                 output["Speaker_Name"] = row[4]
-                output["Meeting_Topic_Long"] = "{0} (ISC)² Silicon Valley Chapter Meeting - {1} - {2}".format(meeting_month_date, row[1], row[4])  
+                output[
+                    "Meeting_Topic_Long"
+                ] = "{0} (ISC)² Silicon Valley Chapter Meeting - {1} - {2}".format(
+                    meeting_month_date, row[1], row[4]
+                )
                 meeting_found = True
                 break
 

@@ -50,6 +50,7 @@ uritemplate = "==4.1.1"
 urllib3 = "==1.26.12"
 webdriver-manager = "==3.8.3"
 wsproto = "==1.2.0"
+flake8 = "*"
 
 [dev-packages]
 
